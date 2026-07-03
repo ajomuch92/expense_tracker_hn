@@ -25,6 +25,8 @@ class AppStrings {
     'total': {'es': 'TOTAL', 'en': 'TOTAL'},
     'recentTransactions': {'es': 'Transacciones Recientes', 'en': 'Recent Transactions'},
     'seeAll': {'es': 'Ver todo', 'en': 'See all'},
+    'allTransactions': {'es': 'Todas las Transacciones', 'en': 'All Transactions'},
+    'transactions': {'es': 'transacciones', 'en': 'transactions'},
     'noTransactions': {'es': 'No hay transacciones en este período', 'en': 'No transactions in this period'},
     'newExpense': {'es': 'Nuevo Gasto', 'en': 'New Expense'},
     'editExpense': {'es': 'Editar Gasto', 'en': 'Edit Expense'},

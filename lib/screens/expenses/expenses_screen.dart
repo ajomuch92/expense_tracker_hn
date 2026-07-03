@@ -9,6 +9,7 @@ import '../../widgets/donut_chart.dart';
 import '../../widgets/period_tabs.dart';
 import '../../widgets/transaction_tile.dart';
 import 'add_expense_screen.dart';
+import 'all_expenses_screen.dart';
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
@@ -92,9 +93,14 @@ class ExpensesScreen extends StatelessWidget {
               children: [
                 Text(context.tr('recentTransactions'),
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                Text(
-                  context.tr('seeAll'),
-                  style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AllExpensesScreen()),
+                  ),
+                  child: Text(
+                    context.tr('seeAll'),
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ],
             ),
