@@ -47,21 +47,19 @@ class ExpensesScreen extends StatelessWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-              child: Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary),
-            ),
             const SizedBox(width: 10),
-            Text(context.tr('myExpenses'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(
+              context.tr('myExpenses'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'expensesFab',
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
-        ),
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
         child: const Icon(Icons.add_rounded),
       ),
       body: RefreshIndicator(
@@ -91,15 +89,25 @@ class ExpensesScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(context.tr('recentTransactions'),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(
+                  context.tr('recentTransactions'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
                 GestureDetector(
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AllExpensesScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const AllExpensesScreen(),
+                    ),
                   ),
                   child: Text(
                     context.tr('seeAll'),
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -111,14 +119,21 @@ class ExpensesScreen extends StatelessWidget {
                 child: Center(
                   child: Text(
                     context.tr('noTransactions'),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
               )
             else
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   child: Column(
                     children: [
                       for (final e in filtered)
@@ -128,7 +143,9 @@ class ExpensesScreen extends StatelessWidget {
                           currency: settings.currency,
                           languageCode: settings.languageCode,
                           onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => AddExpenseScreen(existing: e)),
+                            MaterialPageRoute(
+                              builder: (_) => AddExpenseScreen(existing: e),
+                            ),
                           ),
                         ),
                     ],
