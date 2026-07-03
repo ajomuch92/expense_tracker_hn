@@ -32,6 +32,7 @@ class CategoriesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('categories'))),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'categoriesFab',
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const CategoryFormScreen()),
         ),

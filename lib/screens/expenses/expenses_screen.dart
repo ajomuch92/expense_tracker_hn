@@ -57,6 +57,7 @@ class ExpensesScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'expensesFab',
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
         ),
