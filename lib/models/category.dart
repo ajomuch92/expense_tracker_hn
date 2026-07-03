@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-/// Icons available for categories. Stored in SQLite as their string key.
-const Map<String, IconData> kCategoryIcons = {
+import 'package:flutter/material.dart';
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+
+/// Icons used by categories created before the icon picker was introduced.
+/// Kept only so those categories keep rendering; new/edited categories are
+/// stored via [IconPickerIcon] serialization instead (see [Category.icon]).
+const Map<String, IconData> kLegacyCategoryIcons = {
   'cart': Icons.shopping_cart_rounded,
   'food': Icons.restaurant_rounded,
   'car': Icons.directions_car_rounded,
@@ -18,7 +23,15 @@ const Map<String, IconData> kCategoryIcons = {
   'other': Icons.more_horiz_rounded,
 };
 
-/// Palette offered when creating/editing a category.
+/// Icon used for brand-new categories before the user picks one.
+const IconPickerIcon kDefaultCategoryIcon = IconPickerIcon(
+  name: 'shopping_cart_rounded',
+  data: Icons.shopping_cart_rounded,
+  pack: 'roundedMaterial',
+);
+
+/// Palette offered when creating/editing a category, in addition to the
+/// name-derived and fully custom colors.
 const List<String> kCategoryColors = [
   '#2DD4BF', // teal
   '#F87171', // red
@@ -29,6 +42,20 @@ const List<String> kCategoryColors = [
   '#F472B6', // pink
   '#C084FC', // purple
 ];
+
+/// Deterministic color derived from a category name, so the same name
+/// always maps to the same color (used as the default suggestion for new
+/// categories, similar to how chat apps color avatars from a username).
+Color colorForName(String name) {
+  final trimmed = name.trim().toLowerCase();
+  if (trimmed.isEmpty) return Color(int.parse(kCategoryColors.first.replaceFirst('#', '0xFF')));
+  final hash = trimmed.codeUnits.fold<int>(0, (acc, unit) => (acc * 31 + unit) & 0x7fffffff);
+  final hue = (hash % 360).toDouble();
+  return HSLColor.fromAHSL(1, hue, 0.62, 0.55).toColor();
+}
+
+String colorToHex(Color color) =>
+    '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
 
 class Category {
   final String id;
@@ -47,8 +74,31 @@ class Category {
     this.monthlyBudget,
   });
 
-  IconData get iconData => kCategoryIcons[icon] ?? Icons.more_horiz_rounded;
+  /// Decodes [icon] into the picker's rich representation. Supports both
+  /// the new JSON-serialized [IconPickerIcon] format and the legacy plain
+  /// keys (e.g. `'cart'`) stored by categories created before the picker.
+  IconPickerIcon get iconPickerIcon {
+    try {
+      final decoded = jsonDecode(icon);
+      if (decoded is Map<String, dynamic>) {
+        final result = deserializeIcon(decoded);
+        if (result != null) return result;
+      }
+    } catch (_) {
+      // Not JSON: fall through to the legacy key lookup below.
+    }
+    final legacy = kLegacyCategoryIcons[icon];
+    if (legacy != null) {
+      return IconPickerIcon(name: icon, data: legacy, pack: IconPack.custom.name);
+    }
+    return kDefaultCategoryIcon;
+  }
+
+  IconData get iconData => iconPickerIcon.data;
   Color get color => Color(int.parse(colorHex.replaceFirst('#', '0xFF')));
+
+  /// Encodes an [IconPickerIcon] for storage in the `icon` column.
+  static String encodeIcon(IconPickerIcon icon) => jsonEncode(serializeIcon(icon));
 
   Category copyWith({
     String? name,

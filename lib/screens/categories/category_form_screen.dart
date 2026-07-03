@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart' hide colorToHex;
+import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+import 'package:flutter_iconpicker/Models/configuration.dart';
 import 'package:provider/provider.dart';
 
 import '../../db/db_helper.dart';
@@ -17,9 +20,12 @@ class CategoryFormScreen extends StatefulWidget {
 class _CategoryFormScreenState extends State<CategoryFormScreen> {
   final _nameCtrl = TextEditingController();
   final _budgetCtrl = TextEditingController();
-  String _icon = 'cart';
+  IconPickerIcon _icon = kDefaultCategoryIcon;
   String _colorHex = kCategoryColors.first;
   bool _hasBudget = false;
+  // Whether the color should keep following the name as the user types.
+  // Turns off as soon as the user manually picks a swatch or a custom color.
+  bool _colorFollowsName = true;
   String? _nameError;
 
   bool get _isEditing => widget.existing != null;
@@ -30,10 +36,65 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final c = widget.existing;
     if (c != null) {
       _nameCtrl.text = c.name;
-      _icon = c.icon;
+      _icon = c.iconPickerIcon;
       _colorHex = c.colorHex;
+      _colorFollowsName = false;
       _hasBudget = c.monthlyBudget != null;
       if (c.monthlyBudget != null) _budgetCtrl.text = c.monthlyBudget!.toStringAsFixed(0);
+    }
+  }
+
+  void _onNameChanged(String value) {
+    setState(() {
+      if (_nameError != null) _nameError = null;
+      if (_colorFollowsName) _colorHex = colorToHex(colorForName(value));
+    });
+  }
+
+  Future<void> _pickIcon() async {
+    final icon = await showIconPicker(
+      context,
+      configuration: SinglePickerConfiguration(
+        adaptiveDialog: true,
+        showTooltips: true,
+        preSelected: _icon,
+        title: Text(context.tr('selectIcon')),
+        searchHintText: context.tr('searchIconHint'),
+        closeChild: Text(context.tr('cancel')),
+        iconPackModes: const [
+          IconPack.roundedMaterial,
+          IconPack.outlinedMaterial,
+          IconPack.material,
+        ],
+      ),
+    );
+    if (icon != null) setState(() => _icon = icon);
+  }
+
+  Future<void> _pickCustomColor() async {
+    var picked = Color(int.parse(_colorHex.replaceFirst('#', '0xFF')));
+    final result = await showDialog<Color>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.tr('pickColor')),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: picked,
+            onColorChanged: (c) => picked = c,
+            enableAlpha: false,
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(context.tr('cancel'))),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, picked), child: Text(context.tr('apply'))),
+        ],
+      ),
+    );
+    if (result != null) {
+      setState(() {
+        _colorHex = colorToHex(result);
+        _colorFollowsName = false;
+      });
     }
   }
 
@@ -52,10 +113,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final budget = _hasBudget ? double.tryParse(_budgetCtrl.text.replaceAll(',', '.')) : null;
     final provider = context.read<ExpenseProvider>();
 
+    final encodedIcon = Category.encodeIcon(_icon);
     if (_isEditing) {
       await provider.updateCategory(widget.existing!.copyWith(
         name: name,
-        icon: _icon,
+        icon: encodedIcon,
         colorHex: _colorHex,
         monthlyBudget: budget,
         clearBudget: !_hasBudget,
@@ -64,7 +126,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
       await provider.addCategory(Category(
         id: DbHelper.newId(),
         name: name,
-        icon: _icon,
+        icon: encodedIcon,
         colorHex: _colorHex,
         monthlyBudget: budget,
         createdAt: DateTime.now(),
@@ -122,7 +184,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                    child: Icon(kCategoryIcons[_icon], color: Colors.white, size: 30),
+                    child: Icon(_icon.data, color: Colors.white, size: 30),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -143,62 +205,121 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
             TextField(
               controller: _nameCtrl,
               decoration: InputDecoration(hintText: context.tr('categoryNameHint'), errorText: _nameError),
-              onChanged: (_) {
-                if (_nameError != null) setState(() => _nameError = null);
-              },
+              onChanged: _onNameChanged,
             ),
             const SizedBox(height: 22),
             _Label(context.tr('selectIcon')),
             const SizedBox(height: 10),
-            GridView.count(
-              crossAxisCount: 4,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1,
-              children: kCategoryIcons.entries.map((entry) {
-                final isSelected = _icon == entry.key;
-                return GestureDetector(
-                  onTap: () => setState(() => _icon = entry.key),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    decoration: BoxDecoration(
-                      color: isSelected ? color.withValues(alpha: 0.15) : Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: isSelected ? color : Theme.of(context).dividerColor, width: isSelected ? 1.6 : 1),
+            InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: _pickIcon,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                      child: Icon(_icon.data, color: color, size: 20),
                     ),
-                    child: Icon(entry.value, color: isSelected ? color : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
-                  ),
-                );
-              }).toList(),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(context.tr('chooseIcon'), style: const TextStyle(fontWeight: FontWeight.w600))),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 22),
             _Label(context.tr('visualIdentity')),
             const SizedBox(height: 10),
-            Wrap(
-              spacing: 14,
-              runSpacing: 14,
-              children: kCategoryColors.map((hex) {
-                final c = Color(int.parse(hex.replaceFirst('#', '0xFF')));
-                final isSelected = _colorHex == hex;
-                return GestureDetector(
-                  onTap: () => setState(() => _colorHex = hex),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: c,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
-                          : null,
+            Builder(builder: (context) {
+              final autoColor = colorForName(_nameCtrl.text);
+              final isAutoSelected = _colorFollowsName;
+              final isPreset = !_colorFollowsName && kCategoryColors.contains(_colorHex);
+              final isCustomSelected = !_colorFollowsName && !isPreset;
+
+              return Wrap(
+                spacing: 14,
+                runSpacing: 14,
+                children: [
+                  Tooltip(
+                    message: context.tr('autoColor'),
+                    child: GestureDetector(
+                      onTap: () => setState(() {
+                        _colorFollowsName = true;
+                        _colorHex = colorToHex(autoColor);
+                      }),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: autoColor,
+                          shape: BoxShape.circle,
+                          border: isAutoSelected
+                              ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
+                              : null,
+                        ),
+                        child: Icon(
+                          isAutoSelected ? Icons.check_rounded : Icons.auto_awesome_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
                     ),
-                    child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
                   ),
-                );
-              }).toList(),
-            ),
+                  ...kCategoryColors.map((hex) {
+                    final c = Color(int.parse(hex.replaceFirst('#', '0xFF')));
+                    final isSelected = !_colorFollowsName && _colorHex == hex;
+                    return GestureDetector(
+                      onTap: () => setState(() {
+                        _colorFollowsName = false;
+                        _colorHex = hex;
+                      }),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
+                              : null,
+                        ),
+                        child: isSelected ? const Icon(Icons.check_rounded, color: Colors.white, size: 18) : null,
+                      ),
+                    );
+                  }),
+                  Tooltip(
+                    message: context.tr('customColor'),
+                    child: GestureDetector(
+                      onTap: _pickCustomColor,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: isCustomSelected ? color : Theme.of(context).cardColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isCustomSelected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).dividerColor,
+                            width: isCustomSelected ? 2 : 1,
+                          ),
+                        ),
+                        child: Icon(
+                          isCustomSelected ? Icons.check_rounded : Icons.add_rounded,
+                          color: isCustomSelected ? Colors.white : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
             const SizedBox(height: 22),
             Card(
               child: Padding(
