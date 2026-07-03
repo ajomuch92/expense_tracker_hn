@@ -81,57 +81,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _SectionLabel(context.tr('preferences')),
-          Card(
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.notifications_none_rounded),
-                  title: Text(context.tr('dailyNotifications')),
-                  value: settings.dailyNotifications,
-                  onChanged: settings.setDailyNotifications,
-                ),
-                const Divider(height: 1),
-                SwitchListTile(
-                  secondary: const Icon(Icons.fingerprint_rounded),
-                  title: Text(context.tr('biometricLock')),
-                  value: settings.biometricLock,
-                  onChanged: settings.setBiometricLock,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Card(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.workspace_premium_rounded, color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(context.tr('upgradePremium'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(context.tr('premiumDesc'),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(context.tr('comingSoon')))),
-                      child: Text(context.tr('getPro')),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -164,7 +113,12 @@ class _ThemeOption extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _ThemeOption({required this.icon, required this.label, required this.selected, required this.onTap});
+  const _ThemeOption({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +126,14 @@ class _ThemeOption extends StatelessWidget {
       leading: Icon(icon),
       title: Text(label),
       trailing: selected
-          ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
-          : const Icon(Icons.radio_button_unchecked_rounded, color: Colors.grey),
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : const Icon(
+              Icons.radio_button_unchecked_rounded,
+              color: Colors.grey,
+            ),
       onTap: onTap,
     );
   }
@@ -183,20 +143,38 @@ class _CurrencyOptionTile extends StatelessWidget {
   final CurrencyOption option;
   final bool selected;
   final VoidCallback onTap;
-  const _CurrencyOptionTile({required this.option, required this.selected, required this.onTap});
+  const _CurrencyOptionTile({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-        child: Text(option.symbol, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.12),
+        child: Text(
+          option.symbol,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       title: Text(option.labelKey),
       subtitle: Text(option.code),
       trailing: selected
-          ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
-          : const Icon(Icons.radio_button_unchecked_rounded, color: Colors.grey),
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : const Icon(
+              Icons.radio_button_unchecked_rounded,
+              color: Colors.grey,
+            ),
       onTap: onTap,
     );
   }
@@ -207,7 +185,12 @@ class _LanguageOptionTile extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _LanguageOptionTile({required this.flag, required this.label, required this.selected, required this.onTap});
+  const _LanguageOptionTile({
+    required this.flag,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +198,14 @@ class _LanguageOptionTile extends StatelessWidget {
       leading: Text(flag, style: const TextStyle(fontSize: 22)),
       title: Text(label),
       trailing: selected
-          ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
-          : const Icon(Icons.radio_button_unchecked_rounded, color: Colors.grey),
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : const Icon(
+              Icons.radio_button_unchecked_rounded,
+              color: Colors.grey,
+            ),
       onTap: onTap,
     );
   }
