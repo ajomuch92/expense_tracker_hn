@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../db/db_helper.dart';
 import '../models/category.dart';
@@ -6,11 +7,16 @@ import '../models/expense.dart';
 import '../utils/date_filter.dart';
 
 class ExpenseProvider extends ChangeNotifier {
+  static const _kPresetKey = 'filter_preset';
+  static const _kCustomStartKey = 'filter_custom_start';
+  static const _kCustomEndKey = 'filter_custom_end';
+
   final DbHelper _db = DbHelper.instance;
 
   List<Category> _categories = [];
   List<Expense> _expenses = [];
   bool _loading = true;
+  bool _filterRestored = false;
 
   PeriodPreset _preset = PeriodPreset.lastWeek;
   DateRange? _customRange;
@@ -24,21 +30,61 @@ class ExpenseProvider extends ChangeNotifier {
   Future<void> load() async {
     _loading = true;
     notifyListeners();
+    // Only restore the saved filter once per app run: `load()` also runs on
+    // pull-to-refresh and after every mutation, and re-applying the saved
+    // filter each time would stomp on whatever the user picked meanwhile.
+    if (!_filterRestored) {
+      await _restoreFilter();
+      _filterRestored = true;
+    }
     _categories = await _db.getCategories();
     _expenses = await _db.getExpenses();
     _loading = false;
     notifyListeners();
   }
 
-  void setPreset(PeriodPreset preset) {
-    _preset = preset;
-    notifyListeners();
+  Future<void> _restoreFilter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final presetName = prefs.getString(_kPresetKey);
+    if (presetName != null) {
+      _preset = PeriodPreset.values.firstWhere(
+        (p) => p.name == presetName,
+        orElse: () => PeriodPreset.lastWeek,
+      );
+    }
+    if (_preset == PeriodPreset.custom) {
+      final startStr = prefs.getString(_kCustomStartKey);
+      final endStr = prefs.getString(_kCustomEndKey);
+      if (startStr != null && endStr != null) {
+        _customRange = DateRange(DateTime.parse(startStr), DateTime.parse(endStr));
+      } else {
+        // Custom was saved without a range (shouldn't normally happen): fall
+        // back instead of filtering by a meaningless/default range.
+        _preset = PeriodPreset.lastWeek;
+      }
+    }
   }
 
-  void setCustomRange(DateRange range) {
+  Future<void> _persistFilter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kPresetKey, _preset.name);
+    if (_preset == PeriodPreset.custom && _customRange != null) {
+      await prefs.setString(_kCustomStartKey, _customRange!.start.toIso8601String());
+      await prefs.setString(_kCustomEndKey, _customRange!.end.toIso8601String());
+    }
+  }
+
+  Future<void> setPreset(PeriodPreset preset) async {
+    _preset = preset;
+    notifyListeners();
+    await _persistFilter();
+  }
+
+  Future<void> setCustomRange(DateRange range) async {
     _customRange = range;
     _preset = PeriodPreset.custom;
     notifyListeners();
+    await _persistFilter();
   }
 
   Category? categoryById(String id) {
