@@ -35,6 +35,12 @@ class CategoriesScreen extends StatelessWidget {
         ? 0.0
         : (spentOnBudgeted / totalBudget * 100).clamp(0, 999);
 
+    // Highest spender (this month) first.
+    final sortedCategories = [...categories]..sort((a, b) =>
+        provider
+            .totalSpentForCategory(b.id, range: thisMonth)
+            .compareTo(provider.totalSpentForCategory(a.id, range: thisMonth)));
+
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('categories'))),
       floatingActionButton: FloatingActionButton(
@@ -108,7 +114,7 @@ class CategoriesScreen extends StatelessWidget {
               child: Center(child: Text(context.tr('noCategories'))),
             )
           else
-            ...categories.map(
+            ...sortedCategories.map(
               (c) => _CategoryTile(category: c, thisMonth: thisMonth),
             ),
           const SizedBox(height: 12),
