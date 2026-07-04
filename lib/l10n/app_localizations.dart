@@ -76,7 +76,10 @@ class AppStrings {
     },
     'getPro': {'es': 'Obtener Pro', 'en': 'Get Pro'},
     'totalBudget': {'es': 'PRESUPUESTO TOTAL', 'en': 'TOTAL BUDGET'},
-    'assignedPercent': {'es': 'Has asignado el %s% de tu presupuesto total.', 'en': "You've assigned %s% of your total budget."},
+    'spentPercent': {
+      'es': 'Has gastado el %s% de tu presupuesto total este mes.',
+      'en': "You've spent %s% of your total budget this month."
+    },
     'noLimit': {'es': 'Sin límite', 'en': 'No limit'},
     'confirmDelete': {'es': '¿Eliminar esta categoría?', 'en': 'Delete this category?'},
     'confirmDeleteExpense': {'es': '¿Eliminar este gasto?', 'en': 'Delete this expense?'},

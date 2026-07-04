@@ -21,13 +21,13 @@ class CategoriesScreen extends StatelessWidget {
     final totalBudget = provider.totalMonthlyBudget;
 
     final thisMonth = DateRange.forPreset(PeriodPreset.thisMonth);
-    final assignedPct = totalBudget == 0
-        ? 0.0
-        : (categories.fold<double>(
-                0, (sum, c) => sum + provider.totalSpentForCategory(c.id, range: thisMonth)) /
-            totalBudget *
-            100)
-            .clamp(0, 999);
+    // Only categories that actually have a budget count towards "% of total
+    // budget spent" — otherwise spending from unbudgeted categories would
+    // inflate the percentage past what the total budget can represent.
+    final budgetedCategories = categories.where((c) => (c.monthlyBudget ?? 0) > 0);
+    final spentOnBudgeted = budgetedCategories.fold<double>(
+        0, (sum, c) => sum + provider.totalSpentForCategory(c.id, range: thisMonth));
+    final spentPct = totalBudget == 0 ? 0.0 : (spentOnBudgeted / totalBudget * 100).clamp(0, 999);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('categories'))),
@@ -66,7 +66,7 @@ class CategoriesScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: LinearProgressIndicator(
-                      value: (assignedPct / 100).clamp(0, 1).toDouble(),
+                      value: (spentPct / 100).clamp(0, 1).toDouble(),
                       minHeight: 8,
                       backgroundColor: Theme.of(context).dividerColor,
                       color: Theme.of(context).colorScheme.primary,
@@ -74,7 +74,7 @@ class CategoriesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    context.tr('assignedPercent', [assignedPct.toStringAsFixed(0)]),
+                    context.tr('spentPercent', [spentPct.toStringAsFixed(0)]),
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
