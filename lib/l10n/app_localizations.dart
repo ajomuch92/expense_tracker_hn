@@ -104,8 +104,17 @@ class AppStrings {
     'other': {'es': 'Otros', 'en': 'Other'},
   };
 
-  static String of(BuildContext context, String key, [List<String>? args]) {
-    final lang = context.watch<SettingsProvider>().languageCode;
+  static String of(BuildContext context, String key, [List<String>? args]) =>
+      _resolve(context.watch<SettingsProvider>().languageCode, key, args);
+
+  /// Same as [of], but reads the language without subscribing to changes.
+  /// Use this outside of `build()` (e.g. inside `onPressed`/`onTap`
+  /// callbacks or when eagerly building widgets before a dialog opens),
+  /// where `context.watch` throws because there is no widget tree building.
+  static String ofRead(BuildContext context, String key, [List<String>? args]) =>
+      _resolve(context.read<SettingsProvider>().languageCode, key, args);
+
+  static String _resolve(String lang, String key, List<String>? args) {
     var text = _values[key]?[lang] ?? _values[key]?['es'] ?? key;
     if (args != null) {
       for (final a in args) {
@@ -118,4 +127,7 @@ class AppStrings {
 
 extension AppStringsX on BuildContext {
   String tr(String key, [List<String>? args]) => AppStrings.of(this, key, args);
+
+  /// Same as [tr], but safe to call outside of `build()`.
+  String trRead(String key, [List<String>? args]) => AppStrings.ofRead(this, key, args);
 }

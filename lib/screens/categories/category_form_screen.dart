@@ -58,9 +58,9 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
         adaptiveDialog: true,
         showTooltips: true,
         preSelected: _icon,
-        title: Text(context.tr('selectIcon')),
-        searchHintText: context.tr('searchIconHint'),
-        closeChild: Text(context.tr('cancel')),
+        title: Text(context.trRead('selectIcon')),
+        searchHintText: context.trRead('searchIconHint'),
+        closeChild: Text(context.trRead('cancel')),
         iconPackModes: const [
           IconPack.roundedMaterial,
           IconPack.outlinedMaterial,
@@ -73,10 +73,13 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
 
   Future<void> _pickCustomColor() async {
     var picked = Color(int.parse(_colorHex.replaceFirst('#', '0xFF')));
+    final title = context.trRead('pickColor');
+    final cancel = context.trRead('cancel');
+    final apply = context.trRead('apply');
     final result = await showDialog<Color>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(context.tr('pickColor')),
+        title: Text(title),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: picked,
@@ -85,8 +88,8 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(context.tr('cancel'))),
-          TextButton(onPressed: () => Navigator.pop(dialogContext, picked), child: Text(context.tr('apply'))),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(cancel)),
+          TextButton(onPressed: () => Navigator.pop(dialogContext, picked), child: Text(apply)),
         ],
       ),
     );
@@ -107,7 +110,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
 
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
-    setState(() => _nameError = name.isEmpty ? context.tr('enterName') : null);
+    setState(() => _nameError = name.isEmpty ? context.trRead('enterName') : null);
     if (_nameError != null) return;
 
     final budget = _hasBudget ? double.tryParse(_budgetCtrl.text.replaceAll(',', '.')) : null;

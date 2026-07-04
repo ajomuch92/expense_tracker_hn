@@ -59,9 +59,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final amount = double.tryParse(_amountCtrl.text.replaceAll(',', '.'));
     setState(() {
       _amountError = (amount == null || amount <= 0)
-          ? context.tr('enterAmount')
+          ? context.trRead('enterAmount')
           : null;
-      _categoryError = _categoryId == null ? context.tr('pickCategory') : null;
+      _categoryError = _categoryId == null ? context.trRead('pickCategory') : null;
     });
     if (_amountError != null || _categoryError != null) return;
 
