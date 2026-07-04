@@ -5,6 +5,8 @@ import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/date_filter.dart';
+import '../../utils/formatters.dart';
 import '../../widgets/transaction_tile.dart';
 import '../expenses/add_expense_screen.dart';
 import 'category_form_screen.dart';
@@ -18,8 +20,14 @@ class CategoryExpensesScreen extends StatelessWidget {
     final provider = context.watch<ExpenseProvider>();
     final settings = context.watch<SettingsProvider>();
     final current = provider.categoryById(category.id) ?? category;
+    // Full history, shown in the list below.
     final items = provider.expensesForCategory(category.id);
-    final total = items.fold<double>(0, (s, e) => s + e.amount);
+    // The summary card matches the "this month" scope used everywhere else
+    // budgets are tracked (e.g. the Categories list), so the number here
+    // agrees with what the user just saw before tapping into the category.
+    final thisMonth = DateRange.forPreset(PeriodPreset.thisMonth);
+    final monthlyItems = items.where((e) => thisMonth.contains(e.date)).toList();
+    final total = monthlyItems.fold<double>(0, (s, e) => s + e.amount);
 
     return Scaffold(
       appBar: AppBar(
@@ -55,9 +63,9 @@ class CategoryExpensesScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${items.length} ${items.length == 1 ? 'gasto' : 'gastos'}'),
+                  Text('${monthlyItems.length} ${monthlyItems.length == 1 ? 'gasto' : 'gastos'} · ${context.tr('thisMonth')}'),
                   Text(
-                    '${settings.currency.symbol}${total.toStringAsFixed(2)}',
+                    Formatters.money(total, settings.currency),
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                 ],

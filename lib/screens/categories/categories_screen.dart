@@ -24,18 +24,24 @@ class CategoriesScreen extends StatelessWidget {
     // Only categories that actually have a budget count towards "% of total
     // budget spent" — otherwise spending from unbudgeted categories would
     // inflate the percentage past what the total budget can represent.
-    final budgetedCategories = categories.where((c) => (c.monthlyBudget ?? 0) > 0);
+    final budgetedCategories = categories.where(
+      (c) => (c.monthlyBudget ?? 0) > 0,
+    );
     final spentOnBudgeted = budgetedCategories.fold<double>(
-        0, (sum, c) => sum + provider.totalSpentForCategory(c.id, range: thisMonth));
-    final spentPct = totalBudget == 0 ? 0.0 : (spentOnBudgeted / totalBudget * 100).clamp(0, 999);
+      0,
+      (sum, c) => sum + provider.totalSpentForCategory(c.id, range: thisMonth),
+    );
+    final spentPct = totalBudget == 0
+        ? 0.0
+        : (spentOnBudgeted / totalBudget * 100).clamp(0, 999);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.tr('categories'))),
       floatingActionButton: FloatingActionButton(
         heroTag: 'categoriesFab',
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CategoryFormScreen()),
-        ),
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const CategoryFormScreen())),
         child: const Icon(Icons.add_rounded),
       ),
       body: ListView(
@@ -50,18 +56,27 @@ class CategoriesScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.tr('totalBudget'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            letterSpacing: 1.1,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                          )),
+                      Text(
+                        context.tr('totalBudget'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          letterSpacing: 1.1,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(Formatters.money(totalBudget, settings.currency),
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  Text(
+                    Formatters.money(totalBudget, settings.currency),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -77,7 +92,9 @@ class CategoriesScreen extends StatelessWidget {
                     context.tr('spentPercent', [spentPct.toStringAsFixed(0)]),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -91,7 +108,9 @@ class CategoriesScreen extends StatelessWidget {
               child: Center(child: Text(context.tr('noCategories'))),
             )
           else
-            ...categories.map((c) => _CategoryTile(category: c, thisMonth: thisMonth)),
+            ...categories.map(
+              (c) => _CategoryTile(category: c, thisMonth: thisMonth),
+            ),
           const SizedBox(height: 12),
           InkWell(
             borderRadius: BorderRadius.circular(18),
@@ -105,19 +124,29 @@ class CategoriesScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-                      child: Icon(Icons.add_rounded, color: Theme.of(context).colorScheme.primary),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.12),
+                      child: Icon(
+                        Icons.add_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     const SizedBox(height: 10),
-                    Text(context.tr('needMoreCategories'),
-                        textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      context.tr('needMoreCategories'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       context.tr('createCustomCategory'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -142,14 +171,18 @@ class _CategoryTile extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
     final spent = provider.totalSpentForCategory(category.id, range: thisMonth);
     final budget = category.monthlyBudget;
-    final progress = (budget != null && budget > 0) ? (spent / budget).clamp(0, 1).toDouble() : null;
+    final progress = (budget != null && budget > 0)
+        ? (spent / budget).clamp(0, 1).toDouble()
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => CategoryExpensesScreen(category: category)),
+          MaterialPageRoute(
+            builder: (_) => CategoryExpensesScreen(category: category),
+          ),
         ),
         child: Card(
           child: Padding(
@@ -159,8 +192,15 @@ class _CategoryTile extends StatelessWidget {
                 Container(
                   width: 44,
                   height: 44,
-                  decoration: BoxDecoration(color: category.color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
-                  child: Icon(category.iconData, color: category.color, size: 20),
+                  decoration: BoxDecoration(
+                    color: category.color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    category.iconData,
+                    color: category.color,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -170,14 +210,19 @@ class _CategoryTile extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(category.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(
+                            category.name,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           Text(
                             budget != null
                                 ? '${Formatters.money(spent, settings.currency)} / ${Formatters.money(budget, settings.currency)}'
                                 : '${Formatters.money(spent, settings.currency)} / ${context.tr('noLimit')}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
@@ -196,7 +241,9 @@ class _CategoryTile extends StatelessWidget {
                           backgroundColor: Theme.of(context).dividerColor,
                           color: progress == null
                               ? Theme.of(context).dividerColor
-                              : (progress >= 1 ? Theme.of(context).colorScheme.error : category.color),
+                              : (progress >= 1
+                                    ? Theme.of(context).colorScheme.error
+                                    : category.color),
                         ),
                       ),
                     ],
