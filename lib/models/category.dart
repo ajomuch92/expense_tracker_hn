@@ -63,6 +63,7 @@ class Category {
   final String icon;
   final String colorHex;
   final double? monthlyBudget;
+  final String? description;
   final DateTime createdAt;
 
   const Category({
@@ -72,6 +73,7 @@ class Category {
     required this.colorHex,
     required this.createdAt,
     this.monthlyBudget,
+    this.description,
   });
 
   /// Decodes [icon] into the picker's rich representation. Supports both
@@ -106,6 +108,8 @@ class Category {
     String? colorHex,
     double? monthlyBudget,
     bool clearBudget = false,
+    String? description,
+    bool clearDescription = false,
   }) {
     return Category(
       id: id,
@@ -114,6 +118,7 @@ class Category {
       colorHex: colorHex ?? this.colorHex,
       createdAt: createdAt,
       monthlyBudget: clearBudget ? null : (monthlyBudget ?? this.monthlyBudget),
+      description: clearDescription ? null : (description ?? this.description),
     );
   }
 
@@ -123,6 +128,7 @@ class Category {
         'icon': icon,
         'color': colorHex,
         'monthly_budget': monthlyBudget,
+        'description': description,
         'created_at': createdAt.toIso8601String(),
       };
 
@@ -132,6 +138,7 @@ class Category {
         icon: map['icon'] as String,
         colorHex: map['color'] as String,
         monthlyBudget: (map['monthly_budget'] as num?)?.toDouble(),
+        description: map['description'] as String?,
         createdAt: DateTime.parse(map['created_at'] as String),
       );
 }

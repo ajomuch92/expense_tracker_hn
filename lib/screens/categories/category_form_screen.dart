@@ -19,6 +19,7 @@ class CategoryFormScreen extends StatefulWidget {
 
 class _CategoryFormScreenState extends State<CategoryFormScreen> {
   final _nameCtrl = TextEditingController();
+  final _descriptionCtrl = TextEditingController();
   final _budgetCtrl = TextEditingController();
   IconPickerIcon _icon = kDefaultCategoryIcon;
   String _colorHex = kCategoryColors.first;
@@ -36,6 +37,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final c = widget.existing;
     if (c != null) {
       _nameCtrl.text = c.name;
+      _descriptionCtrl.text = c.description ?? '';
       _icon = c.iconPickerIcon;
       _colorHex = c.colorHex;
       _colorFollowsName = false;
@@ -89,6 +91,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _descriptionCtrl.dispose();
     _budgetCtrl.dispose();
     super.dispose();
   }
@@ -102,6 +105,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     final provider = context.read<ExpenseProvider>();
 
     final encodedIcon = Category.encodeIcon(_icon);
+    final description = _descriptionCtrl.text.trim();
     if (_isEditing) {
       await provider.updateCategory(widget.existing!.copyWith(
         name: name,
@@ -109,6 +113,8 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
         colorHex: _colorHex,
         monthlyBudget: budget,
         clearBudget: !_hasBudget,
+        description: description,
+        clearDescription: description.isEmpty,
       ));
     } else {
       await provider.addCategory(Category(
@@ -117,6 +123,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
         icon: encodedIcon,
         colorHex: _colorHex,
         monthlyBudget: budget,
+        description: description.isEmpty ? null : description,
         createdAt: DateTime.now(),
       ));
     }
@@ -194,6 +201,14 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
               controller: _nameCtrl,
               decoration: InputDecoration(hintText: context.tr('categoryNameHint'), errorText: _nameError),
               onChanged: _onNameChanged,
+            ),
+            const SizedBox(height: 22),
+            _Label(context.tr('description')),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _descriptionCtrl,
+              maxLines: 3,
+              decoration: InputDecoration(hintText: context.tr('descriptionHint')),
             ),
             const SizedBox(height: 22),
             _Label(context.tr('selectIcon')),

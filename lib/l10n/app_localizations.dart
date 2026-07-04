@@ -43,6 +43,8 @@ class AppStrings {
     'editCategory': {'es': 'Editar Categoría', 'en': 'Edit Category'},
     'categoryName': {'es': 'Nombre de la Categoría', 'en': 'Category Name'},
     'categoryNameHint': {'es': 'Ej. Restaurantes, Gimnasio...', 'en': 'E.g. Restaurants, Gym...'},
+    'description': {'es': 'DESCRIPCIÓN (OPCIONAL)', 'en': 'DESCRIPTION (OPTIONAL)'},
+    'descriptionHint': {'es': 'Agrega una nota sobre esta categoría...', 'en': 'Add a note about this category...'},
     'selectIcon': {'es': 'Seleccionar Icono', 'en': 'Select Icon'},
     'chooseIcon': {'es': 'Elegir ícono', 'en': 'Choose icon'},
     'searchIconHint': {'es': 'Buscar ícono...', 'en': 'Search icon...'},
