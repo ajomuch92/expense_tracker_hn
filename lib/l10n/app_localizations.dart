@@ -46,6 +46,7 @@ class AppStrings {
     'selectIcon': {'es': 'Seleccionar Icono', 'en': 'Select Icon'},
     'chooseIcon': {'es': 'Elegir ícono', 'en': 'Choose icon'},
     'searchIconHint': {'es': 'Buscar ícono...', 'en': 'Search icon...'},
+    'noResultsFor': {'es': 'Sin resultados para "%s"', 'en': 'No results for "%s"'},
     'autoColor': {'es': 'Automático (según nombre)', 'en': 'Automatic (from name)'},
     'customColor': {'es': 'Personalizado', 'en': 'Custom'},
     'pickColor': {'es': 'Elegir color', 'en': 'Pick a color'},
