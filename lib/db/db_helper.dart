@@ -54,6 +54,9 @@ class DbHelper {
         FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
       )
     ''');
+    for (final category in buildDefaultCategories()) {
+      await db.insert('categories', category.toMap());
+    }
   }
 
   // ----------------- Categories -----------------

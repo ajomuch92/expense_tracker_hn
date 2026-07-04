@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
+import 'package:uuid/uuid.dart';
 
 /// Icons used by categories created before the icon picker was introduced.
 /// Kept only so those categories keep rendering; new/edited categories are
@@ -48,14 +49,65 @@ const List<String> kCategoryColors = [
 /// categories, similar to how chat apps color avatars from a username).
 Color colorForName(String name) {
   final trimmed = name.trim().toLowerCase();
-  if (trimmed.isEmpty) return Color(int.parse(kCategoryColors.first.replaceFirst('#', '0xFF')));
-  final hash = trimmed.codeUnits.fold<int>(0, (acc, unit) => (acc * 31 + unit) & 0x7fffffff);
+  if (trimmed.isEmpty)
+    return Color(int.parse(kCategoryColors.first.replaceFirst('#', '0xFF')));
+  final hash = trimmed.codeUnits.fold<int>(
+    0,
+    (acc, unit) => (acc * 31 + unit) & 0x7fffffff,
+  );
   final hue = (hash % 360).toDouble();
   return HSLColor.fromAHSL(1, hue, 0.62, 0.55).toColor();
 }
 
 String colorToHex(Color color) =>
     '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+
+/// Names + icons for the categories seeded into a brand-new database, so
+/// the app isn't empty on first launch. Colors aren't listed here — they're
+/// derived from the name via [colorForName], same as new user-created
+/// categories default to.
+const List<(String name, String iconKey, IconData icon)>
+_kDefaultCategorySeeds = [
+  ('Compras', 'shopping_cart_rounded', Icons.shopping_cart_rounded),
+  ('Comida', 'restaurant_rounded', Icons.restaurant_rounded),
+  ('Transporte', 'directions_car_rounded', Icons.directions_car_rounded),
+  ('Hogar', 'home_rounded', Icons.home_rounded),
+  ('Viajes', 'flight_rounded', Icons.flight_rounded),
+  ('Salud', 'favorite_rounded', Icons.favorite_rounded),
+  ('Eventos', 'event_rounded', Icons.event_rounded),
+  ('Educación', 'school_rounded', Icons.school_rounded),
+  ('Entretenimiento', 'movie_rounded', Icons.movie_rounded),
+  ('Regalos', 'card_giftcard_rounded', Icons.card_giftcard_rounded),
+  ('Mascotas', 'pets_rounded', Icons.pets_rounded),
+  ('Gimnasio', 'fitness_center_rounded', Icons.fitness_center_rounded),
+  ('Teléfono', 'phone_iphone_rounded', Icons.phone_iphone_rounded),
+];
+
+/// Builds fresh [Category] instances for the default seed set (new id and
+/// `createdAt` each call), inserted only when the database is first created
+/// — see `DbHelper._onCreate`. Deleting a seeded category afterwards is
+/// final, it won't reappear on a later app launch.
+List<Category> buildDefaultCategories() {
+  const uuid = Uuid();
+  final now = DateTime.now();
+  return [
+    for (var i = 0; i < _kDefaultCategorySeeds.length; i++)
+      Category(
+        id: uuid.v4(),
+        name: _kDefaultCategorySeeds[i].$1,
+        icon: Category.encodeIcon(
+          IconPickerIcon(
+            name: _kDefaultCategorySeeds[i].$2,
+            data: _kDefaultCategorySeeds[i].$3,
+            pack: 'roundedMaterial',
+          ),
+        ),
+        colorHex: colorToHex(colorForName(_kDefaultCategorySeeds[i].$1)),
+        // Offset so `ORDER BY created_at ASC` preserves the intended order.
+        createdAt: now.add(Duration(milliseconds: i)),
+      ),
+  ];
+}
 
 class Category {
   final String id;
@@ -91,7 +143,11 @@ class Category {
     }
     final legacy = kLegacyCategoryIcons[icon];
     if (legacy != null) {
-      return IconPickerIcon(name: icon, data: legacy, pack: IconPack.custom.name);
+      return IconPickerIcon(
+        name: icon,
+        data: legacy,
+        pack: IconPack.custom.name,
+      );
     }
     return kDefaultCategoryIcon;
   }
@@ -100,7 +156,8 @@ class Category {
   Color get color => Color(int.parse(colorHex.replaceFirst('#', '0xFF')));
 
   /// Encodes an [IconPickerIcon] for storage in the `icon` column.
-  static String encodeIcon(IconPickerIcon icon) => jsonEncode(serializeIcon(icon));
+  static String encodeIcon(IconPickerIcon icon) =>
+      jsonEncode(serializeIcon(icon));
 
   Category copyWith({
     String? name,
@@ -123,22 +180,22 @@ class Category {
   }
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'name': name,
-        'icon': icon,
-        'color': colorHex,
-        'monthly_budget': monthlyBudget,
-        'description': description,
-        'created_at': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'icon': icon,
+    'color': colorHex,
+    'monthly_budget': monthlyBudget,
+    'description': description,
+    'created_at': createdAt.toIso8601String(),
+  };
 
   factory Category.fromMap(Map<String, dynamic> map) => Category(
-        id: map['id'] as String,
-        name: map['name'] as String,
-        icon: map['icon'] as String,
-        colorHex: map['color'] as String,
-        monthlyBudget: (map['monthly_budget'] as num?)?.toDouble(),
-        description: map['description'] as String?,
-        createdAt: DateTime.parse(map['created_at'] as String),
-      );
+    id: map['id'] as String,
+    name: map['name'] as String,
+    icon: map['icon'] as String,
+    colorHex: map['color'] as String,
+    monthlyBudget: (map['monthly_budget'] as num?)?.toDouble(),
+    description: map['description'] as String?,
+    createdAt: DateTime.parse(map['created_at'] as String),
+  );
 }
