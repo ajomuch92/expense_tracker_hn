@@ -22,7 +22,13 @@ class DbHelper {
   Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'expense_tracker.db');
-    return openDatabase(path, version: 1, onCreate: _onCreate);
+    return openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE categories ADD COLUMN description TEXT');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -33,6 +39,7 @@ class DbHelper {
         icon TEXT NOT NULL,
         color TEXT NOT NULL,
         monthly_budget REAL,
+        description TEXT,
         created_at TEXT NOT NULL
       )
     ''');
