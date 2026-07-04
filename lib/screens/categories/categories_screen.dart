@@ -186,10 +186,17 @@ class _CategoryTile extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
                         child: LinearProgressIndicator(
-                          value: progress,
+                          // No budget means there's nothing to track progress
+                          // against: use a flat, fully-filled bar in the same
+                          // shade as the track (a plain line) instead of
+                          // `value: null`, which renders as an animated
+                          // indeterminate spinner and looks like it's loading.
+                          value: progress ?? 1,
                           minHeight: 6,
                           backgroundColor: Theme.of(context).dividerColor,
-                          color: (progress != null && progress >= 1) ? Theme.of(context).colorScheme.error : category.color,
+                          color: progress == null
+                              ? Theme.of(context).dividerColor
+                              : (progress >= 1 ? Theme.of(context).colorScheme.error : category.color),
                         ),
                       ),
                     ],
