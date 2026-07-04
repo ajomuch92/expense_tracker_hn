@@ -148,7 +148,9 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     if (confirmed == true) {
       await context.read<ExpenseProvider>().deleteCategory(widget.existing!.id);
       if (!mounted) return;
-      Navigator.of(context).pop();
+      // A single pop would land back on CategoryExpensesScreen for the
+      // category we just deleted. Go all the way back to the root instead.
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

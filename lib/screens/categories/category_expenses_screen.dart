@@ -50,7 +50,7 @@ class CategoryExpensesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         heroTag: 'categoryExpensesFab',
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
+          MaterialPageRoute(builder: (_) => AddExpenseScreen(initialCategoryId: current.id)),
         ),
         child: const Icon(Icons.add_rounded),
       ),

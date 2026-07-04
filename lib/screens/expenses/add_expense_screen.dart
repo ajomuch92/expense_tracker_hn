@@ -10,7 +10,8 @@ import '../../utils/formatters.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final Expense? existing;
-  const AddExpenseScreen({super.key, this.existing});
+  final String? initialCategoryId;
+  const AddExpenseScreen({super.key, this.existing, this.initialCategoryId});
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -35,6 +36,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _notesCtrl.text = e.notes ?? '';
       _categoryId = e.categoryId;
       _date = e.date;
+    } else {
+      _categoryId = widget.initialCategoryId;
     }
   }
 
