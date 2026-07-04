@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart' hide colorToHex;
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import 'package:flutter_iconpicker/Models/configuration.dart';
 import 'package:provider/provider.dart';
 
 import '../../db/db_helper.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../providers/expense_provider.dart';
+import '../../widgets/icon_picker_sheet.dart';
 
 class CategoryFormScreen extends StatefulWidget {
   final Category? existing;
@@ -52,22 +52,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
   }
 
   Future<void> _pickIcon() async {
-    final icon = await showIconPicker(
-      context,
-      configuration: SinglePickerConfiguration(
-        adaptiveDialog: true,
-        showTooltips: true,
-        preSelected: _icon,
-        title: Text(context.trRead('selectIcon')),
-        searchHintText: context.trRead('searchIconHint'),
-        closeChild: Text(context.trRead('cancel')),
-        iconPackModes: const [
-          IconPack.roundedMaterial,
-          IconPack.outlinedMaterial,
-          IconPack.material,
-        ],
-      ),
-    );
+    final icon = await showAppIconPicker(context, preSelected: _icon);
     if (icon != null) setState(() => _icon = icon);
   }
 
