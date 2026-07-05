@@ -7,6 +7,7 @@ import '../../models/expense.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../utils/formatters.dart';
+import '../../widgets/app_toast.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final Expense? existing;
@@ -69,32 +70,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (_amountError != null || _categoryError != null) return;
 
     final provider = context.read<ExpenseProvider>();
-    if (_isEditing) {
-      await provider.updateExpense(
-        widget.existing!.copyWith(
-          amount: amount,
-          categoryId: _categoryId,
-          date: _date,
-          notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-        ),
-      );
-    } else {
-      await provider.addExpense(
-        Expense(
-          id: DbHelper.newId(),
-          categoryId: _categoryId!,
-          amount: amount!,
-          date: _date,
-          notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-          createdAt: DateTime.now(),
-        ),
-      );
+    try {
+      if (_isEditing) {
+        await provider.updateExpense(
+          widget.existing!.copyWith(
+            amount: amount,
+            categoryId: _categoryId,
+            date: _date,
+            notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+          ),
+        );
+      } else {
+        await provider.addExpense(
+          Expense(
+            id: DbHelper.newId(),
+            categoryId: _categoryId!,
+            amount: amount!,
+            date: _date,
+            notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+            createdAt: DateTime.now(),
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      AppToast.error(context, context.tr('unexpectedError'));
+      return;
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.tr('expenseSaved'))));
+    AppToast.success(context, context.tr('expenseSaved'));
     Navigator.of(context).pop();
   }
 
@@ -116,8 +121,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       ),
     );
     if (confirmed == true) {
-      await context.read<ExpenseProvider>().deleteExpense(widget.existing!.id);
+      try {
+        await context.read<ExpenseProvider>().deleteExpense(widget.existing!.id);
+      } catch (_) {
+        if (!mounted) return;
+        AppToast.error(context, context.tr('unexpectedError'));
+        return;
+      }
       if (!mounted) return;
+      AppToast.success(context, context.tr('expenseDeleted'));
       Navigator.of(context).pop();
     }
   }

@@ -7,6 +7,7 @@ import '../../db/db_helper.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category.dart';
 import '../../providers/expense_provider.dart';
+import '../../widgets/app_toast.dart';
 import '../../widgets/icon_picker_sheet.dart';
 
 class CategoryFormScreen extends StatefulWidget {
@@ -106,30 +107,36 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
 
     final encodedIcon = Category.encodeIcon(_icon);
     final description = _descriptionCtrl.text.trim();
-    if (_isEditing) {
-      await provider.updateCategory(widget.existing!.copyWith(
-        name: name,
-        icon: encodedIcon,
-        colorHex: _colorHex,
-        monthlyBudget: budget,
-        clearBudget: !_hasBudget,
-        description: description,
-        clearDescription: description.isEmpty,
-      ));
-    } else {
-      await provider.addCategory(Category(
-        id: DbHelper.newId(),
-        name: name,
-        icon: encodedIcon,
-        colorHex: _colorHex,
-        monthlyBudget: budget,
-        description: description.isEmpty ? null : description,
-        createdAt: DateTime.now(),
-      ));
+    try {
+      if (_isEditing) {
+        await provider.updateCategory(widget.existing!.copyWith(
+          name: name,
+          icon: encodedIcon,
+          colorHex: _colorHex,
+          monthlyBudget: budget,
+          clearBudget: !_hasBudget,
+          description: description,
+          clearDescription: description.isEmpty,
+        ));
+      } else {
+        await provider.addCategory(Category(
+          id: DbHelper.newId(),
+          name: name,
+          icon: encodedIcon,
+          colorHex: _colorHex,
+          monthlyBudget: budget,
+          description: description.isEmpty ? null : description,
+          createdAt: DateTime.now(),
+        ));
+      }
+    } catch (_) {
+      if (!mounted) return;
+      AppToast.error(context, context.tr('unexpectedError'));
+      return;
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('categorySaved'))));
+    AppToast.success(context, context.tr('categorySaved'));
     Navigator.of(context).pop();
   }
 
@@ -146,8 +153,15 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
       ),
     );
     if (confirmed == true) {
-      await context.read<ExpenseProvider>().deleteCategory(widget.existing!.id);
+      try {
+        await context.read<ExpenseProvider>().deleteCategory(widget.existing!.id);
+      } catch (_) {
+        if (!mounted) return;
+        AppToast.error(context, context.tr('unexpectedError'));
+        return;
+      }
       if (!mounted) return;
+      AppToast.success(context, context.tr('categoryDeleted'));
       // A single pop would land back on CategoryExpensesScreen for the
       // category we just deleted. Go all the way back to the root instead.
       Navigator.of(context).popUntil((route) => route.isFirst);
