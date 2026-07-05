@@ -52,6 +52,7 @@ dependencies:
   flutter_tailwind_ui: ^0.0.50
   flutter_colorpicker: ^1.1.0
   flutter_iconpicker: ^4.0.3
+  delightful_toast: ^1.1.0
 
 dev_dependencies:
   flutter_test:
