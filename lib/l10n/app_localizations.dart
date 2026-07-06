@@ -24,6 +24,8 @@ class AppStrings {
     'custom': {'es': 'Personalizado', 'en': 'Custom'},
     'total': {'es': 'TOTAL', 'en': 'TOTAL'},
     'recentTransactions': {'es': 'Transacciones Recientes', 'en': 'Recent Transactions'},
+    'viewAsList': {'es': 'Ver como lista', 'en': 'View as list'},
+    'groupByCategory': {'es': 'Agrupar por categoría', 'en': 'Group by category'},
     'seeAll': {'es': 'Ver todo', 'en': 'See all'},
     'allTransactions': {'es': 'Todas las Transacciones', 'en': 'All Transactions'},
     'transactions': {'es': 'transacciones', 'en': 'transactions'},
