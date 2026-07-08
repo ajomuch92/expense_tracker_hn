@@ -53,6 +53,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   flutter_iconpicker: ^4.0.3
   delightful_toast: ^1.1.0
+  flutter_simple_calculator: ^2.7.1
 
 dev_dependencies:
   flutter_test:
