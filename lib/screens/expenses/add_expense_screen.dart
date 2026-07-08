@@ -1,3 +1,4 @@
+import 'package:expense_tracker_hn/screens/expenses/calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -65,7 +66,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _amountError = (amount == null || amount <= 0)
           ? context.trRead('enterAmount')
           : null;
-      _categoryError = _categoryId == null ? context.trRead('pickCategory') : null;
+      _categoryError = _categoryId == null
+          ? context.trRead('pickCategory')
+          : null;
     });
     if (_amountError != null || _categoryError != null) return;
 
@@ -77,7 +80,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             amount: amount,
             categoryId: _categoryId,
             date: _date,
-            notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+            notes: _notesCtrl.text.trim().isEmpty
+                ? null
+                : _notesCtrl.text.trim(),
           ),
         );
       } else {
@@ -87,7 +92,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             categoryId: _categoryId!,
             amount: amount!,
             date: _date,
-            notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+            notes: _notesCtrl.text.trim().isEmpty
+                ? null
+                : _notesCtrl.text.trim(),
             createdAt: DateTime.now(),
           ),
         );
@@ -122,7 +129,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
     if (confirmed == true) {
       try {
-        await context.read<ExpenseProvider>().deleteExpense(widget.existing!.id);
+        await context.read<ExpenseProvider>().deleteExpense(
+          widget.existing!.id,
+        );
       } catch (_) {
         if (!mounted) return;
         AppToast.error(context, context.tr('unexpectedError'));
@@ -155,6 +164,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               icon: const Icon(Icons.delete_outline_rounded),
               onPressed: _delete,
             ),
+          IconButton(
+            icon: const Icon(Icons.calculate_rounded),
+            onPressed: () {
+              // Open calculator screen
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CalculatorScreen(
+                    onValueSelected: (value) {
+                      setState(() {
+                        _amountCtrl.text = value.toStringAsFixed(2);
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: SafeArea(
