@@ -23,18 +23,21 @@ class SettingsProvider extends ChangeNotifier {
   static const _kLanguage = 'language_code';
   static const _kNotifications = 'daily_notifications';
   static const _kBiometric = 'biometric_lock';
+  static const _kGroupExpensesByCategory = 'group_expenses_by_category';
 
   ThemeMode _themeMode = ThemeMode.dark;
   String _currencyCode = 'USD';
   String _languageCode = 'es';
   bool _dailyNotifications = true;
   bool _biometricLock = false;
+  bool _groupExpensesByCategory = false;
 
   ThemeMode get themeMode => _themeMode;
   String get currencyCode => _currencyCode;
   String get languageCode => _languageCode;
   bool get dailyNotifications => _dailyNotifications;
   bool get biometricLock => _biometricLock;
+  bool get groupExpensesByCategory => _groupExpensesByCategory;
 
   CurrencyOption get currency =>
       kCurrencies.firstWhere((c) => c.code == _currencyCode, orElse: () => kCurrencies.first);
@@ -51,6 +54,7 @@ class SettingsProvider extends ChangeNotifier {
     _languageCode = prefs.getString(_kLanguage) ?? 'es';
     _dailyNotifications = prefs.getBool(_kNotifications) ?? true;
     _biometricLock = prefs.getBool(_kBiometric) ?? false;
+    _groupExpensesByCategory = prefs.getBool(_kGroupExpensesByCategory) ?? false;
     notifyListeners();
   }
 
@@ -87,5 +91,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kBiometric, value);
+  }
+
+  Future<void> setGroupExpensesByCategory(bool value) async {
+    _groupExpensesByCategory = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kGroupExpensesByCategory, value);
   }
 }

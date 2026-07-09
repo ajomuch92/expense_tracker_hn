@@ -13,15 +13,8 @@ import '../../widgets/transaction_tile.dart';
 import 'add_expense_screen.dart';
 import 'all_expenses_screen.dart';
 
-class ExpensesScreen extends StatefulWidget {
+class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
-
-  @override
-  State<ExpensesScreen> createState() => _ExpensesScreenState();
-}
-
-class _ExpensesScreenState extends State<ExpensesScreen> {
-  bool _groupByCategory = false;
 
   Future<void> _pickCustomRange(BuildContext context) async {
     final provider = context.read<ExpenseProvider>();
@@ -192,15 +185,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     _ViewToggleButton(
                       icon: Icons.view_list_rounded,
                       tooltip: context.tr('viewAsList'),
-                      selected: !_groupByCategory,
-                      onTap: () => setState(() => _groupByCategory = false),
+                      selected: !settings.groupExpensesByCategory,
+                      onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(false),
                     ),
                     const SizedBox(width: 6),
                     _ViewToggleButton(
                       icon: Icons.category_rounded,
                       tooltip: context.tr('groupByCategory'),
-                      selected: _groupByCategory,
-                      onTap: () => setState(() => _groupByCategory = true),
+                      selected: settings.groupExpensesByCategory,
+                      onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(true),
                     ),
                     const SizedBox(width: 12),
                     GestureDetector(
@@ -236,7 +229,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   ),
                 ),
               )
-            else if (_groupByCategory)
+            else if (settings.groupExpensesByCategory)
               ..._buildGroupedSections(context, filtered, expenseProvider, settings)
             else
               Card(
