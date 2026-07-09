@@ -22,7 +22,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         leading: BackButton(onPressed: () => Navigator.of(context).pop()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check_box),
             onPressed: () {
               widget.onValueSelected(_currentValue);
               Navigator.of(context).pop();
@@ -30,17 +30,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
         ],
       ),
-      body: Container(
-        padding: const EdgeInsets.all(16),
-        child: SimpleCalculator(
-          value: _currentValue,
-          hideExpression: true,
-          onChanged: (key, value, expression) {
-            setState(() {
-              _currentValue = value ?? 0.0;
-            });
-          },
-        ),
+      body: SimpleCalculator(
+        value: _currentValue,
+        hideExpression: true,
+        onChanged: (key, value, expression) {
+          setState(() {
+            _currentValue = value ?? 0.0;
+          });
+        },
       ),
     );
   }
