@@ -51,7 +51,7 @@ class CategoriesScreen extends StatelessWidget {
         child: const Icon(Icons.add_rounded),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           Card(
             child: Padding(
@@ -70,7 +70,7 @@ class CategoriesScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -152,7 +152,7 @@ class CategoriesScreen extends StatelessWidget {
                         fontSize: 12,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],

@@ -22,7 +22,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         leading: BackButton(onPressed: () => Navigator.of(context).pop()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check_box),
+            icon: const Icon(Icons.check_rounded),
+            tooltip: context.tr('apply'),
             onPressed: () {
               widget.onValueSelected(_currentValue);
               Navigator.of(context).pop();

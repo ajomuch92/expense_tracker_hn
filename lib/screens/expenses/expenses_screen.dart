@@ -120,7 +120,10 @@ class ExpensesScreen extends StatelessWidget {
     final expenseProvider = context.watch<ExpenseProvider>();
     final settings = context.watch<SettingsProvider>();
 
-    if (expenseProvider.loading) {
+    // Only take over the whole screen on the very first load (no data yet).
+    // Pull-to-refresh and post-mutation reloads also flip `loading`, but the
+    // list and chart should stay put; RefreshIndicator shows its own spinner.
+    if (expenseProvider.loading && expenseProvider.categories.isEmpty) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -129,18 +132,14 @@ class ExpensesScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const SizedBox(width: 10),
-            Text(
-              context.tr('myExpenses'),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ],
+        title: Text(
+          context.tr('myExpenses'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'expensesFab',
+        tooltip: context.tr('newExpense'),
         onPressed: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
@@ -149,14 +148,14 @@ class ExpensesScreen extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: expenseProvider.load,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           children: [
             PeriodTabs(
               selected: expenseProvider.preset,
               onSelect: expenseProvider.setPreset,
               onCustomTap: () => _pickCustomRange(context),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
@@ -169,63 +168,83 @@ class ExpensesScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.tr('recentTransactions'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                Expanded(
+                  child: Text(
+                    context.tr('recentTransactions'),
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-                Row(
-                  children: [
-                    _ViewToggleButton(
-                      icon: Icons.view_list_rounded,
-                      tooltip: context.tr('viewAsList'),
-                      selected: !settings.groupExpensesByCategory,
-                      onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(false),
+                const SizedBox(width: 8),
+                _ViewToggleButton(
+                  icon: Icons.view_list_rounded,
+                  tooltip: context.tr('viewAsList'),
+                  selected: !settings.groupExpensesByCategory,
+                  onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(false),
+                ),
+                const SizedBox(width: 4),
+                _ViewToggleButton(
+                  icon: Icons.category_rounded,
+                  tooltip: context.tr('groupByCategory'),
+                  selected: settings.groupExpensesByCategory,
+                  onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(true),
+                ),
+                const SizedBox(width: 4),
+                InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AllExpensesScreen(),
                     ),
-                    const SizedBox(width: 6),
-                    _ViewToggleButton(
-                      icon: Icons.category_rounded,
-                      tooltip: context.tr('groupByCategory'),
-                      selected: settings.groupExpensesByCategory,
-                      onTap: () => context.read<SettingsProvider>().setGroupExpensesByCategory(true),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 14,
                     ),
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const AllExpensesScreen(),
-                        ),
+                    child: Text(
+                      context.tr('seeAll'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: Text(
-                        context.tr('seeAll'),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             if (filtered.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Center(
-                  child: Text(
-                    context.tr('noTransactions'),
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.receipt_long_rounded,
+                        size: 40,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.25),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        context.tr('noTransactions'),
+                        textAlign: TextAlign.center,
+                        // 0.6 clears WCAG AA (~4.5:1) on the surface; 0.5 did not.
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )
@@ -240,18 +259,23 @@ class ExpensesScreen extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      for (final e in filtered)
+                      for (var i = 0; i < filtered.length; i++) ...[
+                        if (i > 0) const Divider(height: 1),
                         TransactionTile(
-                          expense: e,
-                          category: expenseProvider.categoryById(e.categoryId),
+                          expense: filtered[i],
+                          category: expenseProvider.categoryById(
+                            filtered[i].categoryId,
+                          ),
                           currency: settings.currency,
                           languageCode: settings.languageCode,
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => AddExpenseScreen(existing: e),
+                              builder: (_) =>
+                                  AddExpenseScreen(existing: filtered[i]),
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),
@@ -279,24 +303,39 @@ class _ViewToggleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? scheme.primary.withValues(alpha: 0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: selected ? scheme.primary : scheme.onSurface.withValues(alpha: 0.5),
+        // 48x48 hit area (Material min touch target) around a 32px visual pill.
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                // Inverted-Action selection, matching PeriodTabs so both
+                // selection controls speak one language and Fresh Mint stays
+                // the single voice in this row (the "See all" link).
+                color: selected
+                    ? (isDark ? Colors.white : Colors.black)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: selected
+                    ? (isDark ? Colors.black : Colors.white)
+                    : scheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
           ),
         ),
       ),

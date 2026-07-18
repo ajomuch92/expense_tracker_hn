@@ -70,7 +70,7 @@ class CategoryExpensesScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${monthlyItems.length} ${monthlyItems.length == 1 ? 'gasto' : 'gastos'} · ${context.tr('thisMonth')}'),
+                  Text('${monthlyItems.length} ${context.tr('transactions')} · ${context.tr('thisMonth')}'),
                   Text(
                     Formatters.money(total, settings.currency),
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -83,7 +83,29 @@ class CategoryExpensesScreen extends StatelessWidget {
           if (items.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 60),
-              child: Center(child: Text(context.tr('noTransactions'))),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long_rounded,
+                      size: 40,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.25),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      context.tr('noTransactions'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             )
           else
             Card(
@@ -91,16 +113,20 @@ class CategoryExpensesScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Column(
                   children: [
-                    for (final e in items)
+                    for (var i = 0; i < items.length; i++) ...[
+                      if (i > 0) const Divider(height: 1),
                       TransactionTile(
-                        expense: e,
+                        expense: items[i],
                         category: current,
                         currency: settings.currency,
                         languageCode: settings.languageCode,
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => AddExpenseScreen(existing: e)),
+                          MaterialPageRoute(
+                            builder: (_) => AddExpenseScreen(existing: items[i]),
+                          ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),

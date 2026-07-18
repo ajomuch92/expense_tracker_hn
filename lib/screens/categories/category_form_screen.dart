@@ -204,7 +204,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                       fontSize: 11,
                       letterSpacing: 1.1,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -356,7 +356,7 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
                                 context.tr('setSpendingLimit'),
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),
                               ),
                             ],
@@ -402,7 +402,7 @@ class _Label extends StatelessWidget {
         fontSize: 11,
         letterSpacing: 1.1,
         fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
       ),
     );
   }

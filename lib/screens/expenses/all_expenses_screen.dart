@@ -67,7 +67,29 @@ class AllExpensesScreen extends StatelessWidget {
           if (items.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 60),
-              child: Center(child: Text(context.tr('noTransactions'))),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long_rounded,
+                      size: 40,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.25),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      context.tr('noTransactions'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             )
           else
             Card(
@@ -75,16 +97,20 @@ class AllExpensesScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Column(
                   children: [
-                    for (final e in items)
+                    for (var i = 0; i < items.length; i++) ...[
+                      if (i > 0) const Divider(height: 1),
                       TransactionTile(
-                        expense: e,
-                        category: expenseProvider.categoryById(e.categoryId),
+                        expense: items[i],
+                        category: expenseProvider.categoryById(items[i].categoryId),
                         currency: settings.currency,
                         languageCode: settings.languageCode,
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => AddExpenseScreen(existing: e)),
+                          MaterialPageRoute(
+                            builder: (_) => AddExpenseScreen(existing: items[i]),
+                          ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
