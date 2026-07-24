@@ -174,6 +174,24 @@ class AppStrings {
     'yesterday': {'es': 'Ayer', 'en': 'Yesterday'},
     'other': {'es': 'Otros', 'en': 'Other'},
     'calculator': {'es': 'Calculadora', 'en': 'Calculator'},
+    'search': {'es': 'Buscar', 'en': 'Search'},
+    'searchHint': {
+      'es': 'Buscar por descripción o categoría...',
+      'en': 'Search by description or category...',
+    },
+    'searchPrompt': {
+      'es': 'Escribe para buscar tus gastos',
+      'en': 'Type to search your expenses',
+    },
+    'noSearchResults': {
+      'es': 'No se encontraron resultados',
+      'en': 'No results found',
+    },
+    'filterByDate': {
+      'es': 'Filtrar por fecha (opcional)',
+      'en': 'Filter by date (optional)',
+    },
+    'results': {'es': 'resultados', 'en': 'results'},
   };
 
   static String of(BuildContext context, String key, [List<String>? args]) =>
