@@ -12,6 +12,7 @@ import '../../widgets/period_tabs.dart';
 import '../../widgets/transaction_tile.dart';
 import 'add_expense_screen.dart';
 import 'all_expenses_screen.dart';
+import 'search_screen.dart';
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
@@ -136,6 +137,16 @@ class ExpensesScreen extends StatelessWidget {
           context.tr('myExpenses'),
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            tooltip: context.tr('search'),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'expensesFab',
